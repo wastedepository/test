@@ -79,5 +79,9 @@ int main(int argc, char** argv) {
         ch = getchar();
     }
     
+    if (ferror(stdin)) {
+        perror("Read error");
+    }
+    
     return 0;
 }

@@ -14,15 +14,17 @@
   will be used.
   
   Notes:
-  -Each word consists of non-whitespace characters, separated by whitespace
-  -\r\n will be counted as a single newline character
+  -Each word consists of non-whitespace characters, bordered by whitespace.
+  -\r is not counted as a newline character, as with standard 'wc'
   -Does not work on Windows, due to the use of POSIX stat() to determine byte
    counts for each file. These are used to compute the maximum possible width
    for each column in the output.
-  -This program counts lines and words slightly differently than standard 'wc'
-   does. This is mainly noticeable when reading binary files.
+  -This program counts words slightly differently than standard 'wc' does. This
+   is mainly noticeable when reading binary files.
   -Unlike standard 'wc', this program doesn't print out stats for a file which
    could not be read (say, a directory).
+  -I use unsigned long longs to store the statistics, but if you try to sum
+   enough large files, they can still become overrun.
 */
 
 #include <iostream>
@@ -38,9 +40,7 @@ using std::cerr;
 using std::endl;
 using std::fill_n;
 
-//For our counting metrics, use the same data type that POSIX size() uses to
-//store file sizes.
-typedef off_t Count;
+typedef unsigned long long Count;
 
 const char INVALID_CHAR = -1;
 
@@ -180,14 +180,13 @@ bool ProcessFile(const char* filename, FILE* file, bool bUseLines,
                  Count* pTotalWordNum, Count* pTotalByteNum, int columnWidth) {
     Count lineNum = 0, wordNum = 0, byteNum = 0;
     
-    char prevCh = INVALID_CHAR;
     char ch = getc(file);
     
     //For word-counting purposes, we'll pretend the start of the input was
     //preceded by whitespace.
-    bool bPrevWasSpace = true;
+    bool bPrevChWasSpace = true;
     
-    bool bCurrentIsSpace;
+    bool bCurrentChIsSpace;
     
     //Count statistics. To avoid constant comparisons during the loop, we'll
     //accumulate all data, regardless of whether we print it.
@@ -196,16 +195,13 @@ bool ProcessFile(const char* filename, FILE* file, bool bUseLines,
     //though neither feof or ferror has been set for the file. I'm not sure
     //why.
     while (ch != EOF || (!feof(file) && !ferror(file))) {
-        if (ch == '\r')
+        if (ch == '\n') {
             ++lineNum;
-        else if (ch == '\n') {
-            if (prevCh != '\r')
-                ++lineNum;
         }
         
-        bCurrentIsSpace = isspace(ch);
+        bCurrentChIsSpace = isspace(ch);
         
-        if (!bCurrentIsSpace && bPrevWasSpace)
+        if (!bCurrentChIsSpace && bPrevChWasSpace)
             ++wordNum;
         
         //Note: If we're dealing with a file rather than stdin, we're
@@ -216,8 +212,7 @@ bool ProcessFile(const char* filename, FILE* file, bool bUseLines,
         //could change this behavior to reuse the previously obtained data.
         ++byteNum;
         
-        prevCh = ch;
-        bPrevWasSpace = bCurrentIsSpace;
+        bPrevChWasSpace = bCurrentChIsSpace;
         ch = getc(file);
     }
     
