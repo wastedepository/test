@@ -107,7 +107,6 @@ int main(int argc, char** argv) {
     bool bUsingStdin = false;
     
     if (fileNum > 0) {
-        //Precompute byte counts for all files, find largest.
         for (int i = optind; i < argc; ++i) {
             if (stat(argv[i], &st) == 0) {
                 tempTotalByteNum += st.st_size;
