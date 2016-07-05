@@ -239,6 +239,7 @@ bool ProcessFile(const char* filename, FILE* file, bool bUseLines,
     return true;
 }
 
+//Print stats about a file that has been read (or stdin).
 void PrintStats(bool bUseLines, bool bUseWords, bool bUseBytes,
                 Count* pLineNum, Count* pWordNum, Count* pByteNum,
                 const char* label, int columnWidth) {
