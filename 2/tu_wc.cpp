@@ -19,6 +19,10 @@
   -Does not work on Windows, due to the use of POSIX stat() to determine byte
    counts for each file. These are used to compute the maximum possible width
    for each column in the output.
+  -This program counts lines and words slightly differently than standard 'wc'
+   does. This is mainly noticeable when reading binary files.
+  -Unlike standard 'wc', this program doesn't print out stats for a file which
+   could not be read (say, a directory).
 */
 
 #include <iostream>
@@ -171,8 +175,6 @@ int main(int argc, char** argv) {
 
 //Scan a text file and gather various statistics from the data in it.
 //Returns false if failed to process file, true otherwise.
-//Note that, unlike with standard 'wc', this function doesn't print out stats
-//for a file which could not be read (say, a directory).
 bool ProcessFile(const char* filename, FILE* file, bool bUseLines,
                  bool bUseWords, bool bUseBytes, Count* pTotalLineNum,
                  Count* pTotalWordNum, Count* pTotalByteNum, int columnWidth) {
