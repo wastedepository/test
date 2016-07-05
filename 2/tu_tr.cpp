@@ -1,6 +1,7 @@
 /*
   Custom version of standard 'tr' command
   Author: Rains Jordan
+  Version: 1.0
   
   Only supports basic 'tr' features. Two arguments are accepted as input. Each
   character from the first argument will be overwritten by the character at
@@ -14,9 +15,11 @@
 #include <iostream>
 #include <cstring>
 #include <cstdio>
+#include <algorithm>
 
-using std::cout;
+using std::cerr;
 using std::endl;
+using std::fill_n;
 
 const int ARGS_USED_NUM = 2;
 const int ASCII_MAX = 256;
@@ -25,11 +28,11 @@ const char NO_MATCH = -1;
 
 int main(int argc, char** argv) {
     if (argc != ARGS_USED_NUM + 1) {
-        cout << "Usage: ./tu_tr ARG1 ARG2" << endl
+        cerr << "Usage: ./tu_tr ARG1 ARG2" << endl
              << "(Each instance of a character from ARG1 "
              << "will be overwritten by the character at the corresponding "
              << "position in ARG2.)" << endl;
-        return 0;
+        return 1;
     }
     
     char* arg1 = argv[1];
@@ -44,7 +47,7 @@ int main(int argc, char** argv) {
     //to, for example, use a separate map of bools. Looking a character up in
     //this map would indicate whether it has a mapping or not.
     char map[ASCII_MAX];
-    memset(map, NO_MATCH, sizeof(map));
+    fill_n(map, sizeof(map) / sizeof(char), NO_MATCH);
     
     int len1 = strlen(arg1);
     int arg2MaxValidPos = strlen(arg2) - 1;
@@ -64,8 +67,8 @@ int main(int argc, char** argv) {
     
     while (ch != EOF) {
         if (ch >= ASCII_MAX) {
-            cout << "Error: Unexpected input." << endl;
-            return 0;
+            cerr << "Error: Unexpected input." << endl;
+            return 1;
         }
         
         if (map[(int)ch] != NO_MATCH)
